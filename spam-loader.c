@@ -29,7 +29,7 @@
 
 static void * test_load(const char *path) {
 	fprintf(stderr, "Loading %s...", path);
-	void *p = dlopen(path, DLOPEN_FLAGS);
+	void *p = dlmopen(LM_ID_NEWLM, path, DLOPEN_FLAGS);
 	if (p != NULL) {
 		fprintf(stderr, " OK\n");
 	} else {

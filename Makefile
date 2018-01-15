@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-CPPFLAGS := -I.
+CPPFLAGS := -I. -D_GNU_SOURCE
 CFLAGS := -std=gnu99 -pedantic -Wall -Wextra -pthread -g
 LDFLAGS := -pthread
 
