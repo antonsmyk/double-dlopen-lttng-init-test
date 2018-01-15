@@ -24,14 +24,13 @@
 #include <stdint.h>
 #include <time.h>
 #include <pthread.h>
-#include "libspam-trace.h"
 
 #define MILLIARD 1000000000
 
-void spam_foo(void) {
-	struct timespec current;
-	clock_gettime(CLOCK_REALTIME, &current);
-	uint64_t timestamp = ((uint64_t)current.tv_sec) * MILLIARD + current.tv_nsec;
-	tracepoint(spam, dummy_event, timestamp);
-}
+extern int g_foo_counter;
 
+int g_foo_counter = 0;
+int get_foo(void) {
+	g_foo_counter++;
+	return g_foo_counter;
+}

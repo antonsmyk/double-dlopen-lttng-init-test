@@ -26,19 +26,13 @@ LDFLAGS := -pthread
 .PHONY: all
 all: libspam.so libspam-clone.so spam-loader
 
-libspam.so: LDFLAGS += -shared -llttng-ust
-libspam.so: libspam-foo.o libspam-trace.o
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
-
-libspam-trace.h: libspam-trace.tp
-	lttng-gen-tp libspam-trace.tp -o $@
-libspam-trace.c: libspam-trace.tp
-	lttng-gen-tp libspam-trace.tp -o $@
+libspam.so: LDFLAGS += -shared
+libspam.so: LIBS += -lrt
+libspam.so: libspam-foo.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 libspam-foo.o: CFLAGS += -fPIC
-libspam-foo.o: libspam-trace.h libspam-foo.c
-libspam-trace.o: CFLAGS += -fPIC
-libspam-trace.o: libspam-trace.h libspam-trace.c
+libspam-foo.o: libspam-foo.c
 
 libspam-clone.so: libspam.so
 	cp -f libspam.so libspam-clone.so
@@ -52,5 +46,4 @@ clean:
 	rm -f libspam.so
 	rm -f libspam-clone.so
 	rm -f *.o
-	rm -f libspam-trace.h libspam-trace.c
 

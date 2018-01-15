@@ -24,14 +24,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <dlfcn.h>
+#include <link.h>
 
 #define DLOPEN_FLAGS RTLD_NOW
+#define DLMOPEN_LMID LM_ID_NEWLM
 
 static void * test_load(const char *path) {
 	fprintf(stderr, "Loading %s...", path);
-	void *p = dlmopen(LM_ID_NEWLM, path, DLOPEN_FLAGS);
+	void *p = dlmopen(DLMOPEN_LMID, path, DLOPEN_FLAGS);
 	if (p != NULL) {
 		fprintf(stderr, " OK\n");
+		int (*get_foo)(void) = (int (*)(void)) dlsym(p, "get_foo");
+		if (get_foo != NULL) {
+			int n = (*get_foo)();
+			fprintf(stderr, "get_foo: %d\n", n);
+		} else {
+			fprintf(stderr, "dlsym(get_foo) failed: %s\n", dlerror());
+		}
 	} else {
 		fprintf(stderr, "dlopen(%s) failed: %s\n", path, dlerror());
 	} 
