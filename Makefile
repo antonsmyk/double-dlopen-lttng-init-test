@@ -1,5 +1,5 @@
 # The libspam test dynamic library and spam-loader test executable
-# Copyright 2017 Itiviti AB, Anton Smyk <Anton.Smyk@itiviti.com>
+# Copyright 2018 Itiviti AB, Anton Smyk <Anton.Smyk@itiviti.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -23,34 +23,39 @@ CPPFLAGS := -I.
 CFLAGS := -std=gnu99 -pedantic -Wall -Wextra -pthread -g
 LDFLAGS := -pthread
 
-.PHONY: all
-all: libspam.so libspam-clone.so spam-loader
+TARGETS := \
+	libspam-foo.so libspam-foo-clone.so \
+	libspam-bar.so libspam-bar-clone.so \
+ 	spam-loader
 
-libspam.so: LDFLAGS += -shared -llttng-ust
-libspam.so: libspam-foo.o libspam-trace.o
+.PHONY: all
+all: $(TARGETS)
+
+libspam-%.so: LDFLAGS += -shared -llttng-ust
+libspam-%.so: libspam-%.o libspam-trace.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-libspam-trace.h: libspam-trace.tp
-	lttng-gen-tp libspam-trace.tp -o $@
-libspam-trace.c: libspam-trace.tp
-	lttng-gen-tp libspam-trace.tp -o $@
-
-libspam-foo.o: CFLAGS += -fPIC
-libspam-foo.o: libspam-trace.h libspam-foo.c
-libspam-trace.o: CFLAGS += -fPIC
+libspam-%.o: CFLAGS += -fPIC
+libspam-%.o: libspam-trace.h libspam-%.c
 libspam-trace.o: libspam-trace.h libspam-trace.c
+libspam-trace.h libspam-trace.c: libspam-trace.tp
+	lttng-gen-tp libspam-trace.tp -o $@
+libspam-%-clone.so: libspam-%.so
+	cp -f $^ $@
 
-libspam-clone.so: libspam.so
-	cp -f libspam.so libspam-clone.so
+spam-loader: LDFLAGS += -ldl -llttng-ust
+spam-loader: spam-loader-main.o spam-loader-trace.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+spam-loader-main.c: spam-loader-trace.h spam-loader-trace.c
+spam-loader-trace.h spam-loader-trace.c: spam-loader-trace.tp
+	lttng-gen-tp spam-loader-trace.tp -o $@
+spam-loader-trace.o: spam-loader-trace.h spam-loader-trace.c
 
-spam-loader: LDFLAGS += -ldl
-spam-loader: spam-loader.o
 
 .PHONY: clean
 clean:
-	rm -f spam-loader
-	rm -f libspam.so
-	rm -f libspam-clone.so
+	rm -f $(TARGETS)
 	rm -f *.o
 	rm -f libspam-trace.h libspam-trace.c
+	rm -f spam-loader-trace.h spam-loader-trace.c
 

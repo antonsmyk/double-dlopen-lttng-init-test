@@ -23,7 +23,7 @@
 
 #include "libspam-trace.h"
 
-void spam_foo(unsigned counter) {
-	tracepoint(libspam, foo_event, counter);
+void spam_bar(unsigned counter) {
+	tracepoint(libspam, bar_event, counter);
 }
 

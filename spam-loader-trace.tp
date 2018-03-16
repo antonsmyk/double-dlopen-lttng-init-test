@@ -1,5 +1,5 @@
 /*
- * The libspam test dynamic library
+ * The spam-loader test executable
  * Copyright 2018 Itiviti AB, Anton Smyk <Anton.Smyk@itiviti.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -21,9 +21,11 @@
  * SOFTWARE.
  */
 
-#include "libspam-trace.h"
-
-void spam_foo(unsigned counter) {
-	tracepoint(libspam, foo_event, counter);
-}
+TRACEPOINT_EVENT(spam_loader, phase_marker,
+    TP_ARGS(
+	const char *, phase_name_arg),
+    TP_FIELDS(
+        ctf_string(phase_name, phase_name_arg)
+    )
+)
 
